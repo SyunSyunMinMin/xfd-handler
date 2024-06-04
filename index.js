@@ -358,7 +358,6 @@ $(function() {
 					async openPreviewDialog() {
 						this.showMainDialog = false;
 						const comment = generateAdminComment(this.templateValue, this.commentValue);
-						console.log(comment);
 						const content = await generateNewContent(getResult(this), comment, {needCheck: this.needCheckValue});
 						this.previewContent = await createPreviewContent(content);
 						this.showPreviewDialog = true;
@@ -401,23 +400,6 @@ $(function() {
 				.mount(mountPoint);
 		}
 
-		$(document).on('click', '.xfdh-actionlink', function() {
-			console.log(this);
-			console.log($(this).attr('name'));
-			switch ($(this).attr('name')) {
-				case 'vote':
-					console.log('vote fire');
-					break;
-				case 'delete':
-					console.log('delete fire');
-					break;
-				case 'close':
-					console.log('close fire');
-					break;
-				default:
-			}
-		});
-
 		function getResult(obj) {
 			var result;
 			if (obj.resultValue === 'その他') {
@@ -458,7 +440,6 @@ $(function() {
 				title: title
 			});
 			var newContent = response.parse.text;
-			console.log(newContent);
 			return newContent;
 		}
 
@@ -476,7 +457,6 @@ $(function() {
 				titles: title
 			});
 			const oldContent = response.query.pages[0].revisions[0].slots.main.content;
-			console.log(oldContent);
 			var newContent = oldContent;
 			if (needCheck) {
 				newContent = oldContent.replace(headerRegExp, '$1\n{{確認待ち}}').replace(emCatRegExp, '');
@@ -489,7 +469,6 @@ $(function() {
 					.replace(checktagRegExp, '');
 				newContent += '\n' + comment + '\n' + '{{subst:Vfd bottom}}';
 			}
-			console.log(newContent);
 			return newContent;
 		}
 
@@ -543,8 +522,7 @@ $(function() {
 					title: XFDH.pageName,
 					format: 'json'
 				}
-			).then(function(data) {
-				console.log(data);
+			).then(function() {
 				mw.notify('投票に成功しました。');
 			}, function(data, detail) {
 				mw.notify($('<div>' + data + '<br />' + detail.error.info + '</div>'), {
@@ -552,7 +530,6 @@ $(function() {
 					title: 'エラー',
 					type: 'error'
 				});
-				console.log(detail);
 			});
 		}
 
@@ -562,7 +539,6 @@ $(function() {
 				mw.notify('削除依頼対象のページが1つも指定されていません', {type: 'error'});
 				return;
 			}
-			console.log(obj.closeCheckedValues);
 			for (let i = 0; i < obj.closeCheckedValues.length; i++) {
 				const title = obj.closeCheckedValues[i];
 				if (obj.rmtagCheckedValue) {
@@ -587,10 +563,10 @@ $(function() {
 				summary = '終了';
 			}
 			const apiResult = await editPage(XFDH.pageName, newContent, summary);
+			return apiResult;
 		}
 
 		async function rmtagFromPage(title) {
-			console.log(title);
 			const response = await XFDH.api.get({
 				action: 'query',
 				format: 'json',
@@ -601,7 +577,6 @@ $(function() {
 				titles: title
 			});
 			const oldcontent = response.query.pages[0].revisions[0].slots.main.content;
-			console.log(oldcontent);
 			const topCmt = '<!-- 削除についての議論が終了するまで、下記のメッセージ部分は除去しないでください。もしあなたがこのテンプレートを除去した場合、差し戻されます。またページが保護されることもあります。 -->',
 				lstCmt = '<!-- 削除についての議論が終了するまで、上記部分は削除しないでください。 -->',
 				hasTopCmt = oldcontent.includes(topCmt),
@@ -613,7 +588,6 @@ $(function() {
 				.replace(lstCmt, '')
 				.replace(tagRegExp, '')
 				.trim();
-			console.log(newContent);
 			if (!hasTag) {
 				mw.notify($(`<span><a href="${mw.util.getUrl(title)}" target="_blank">${title}</a> で削除依頼タグが検出できませんでした。</span><br /><span>既に除去されたか、そもそも削除審議の対象ではないかもしれません。</span>`), {
 					autoHide: false,
@@ -668,28 +642,21 @@ $(function() {
 			if (!missing) {
 				const oldcontent = response.query.pages[0].revisions[0].slots.main.content;
 				const curtemplate = oldcontent.match(/(\{\{削除依頼ログ(?:<nowiki>.*<\/nowiki>|[^}}])*\}\})/gs);
-				console.log(curtemplate);
 				if (curtemplate !== null) {
 					curtemplate.forEach(function(temp) {
-						console.log(temp);
 						const regexp = /talk=true/;
 						const isfortalk = regexp.test(temp);
 						const counter = temp.match(/\|(?:full)?page(?<num>\d+)/g);
 						var count = 1;
 						counter.forEach(function(t) {
-							console.log(t);
 							var num = t.match(/\d+/);
-							console.log(num);
-							console.log(num[0]);
 							num = Number(num[0]);
 							if (count <= num) {
 								count = num + 1;
 							}
 						});
-						console.log(count);
 
 						if (!isfortalk && !isTalk || isfortalk && isTalk) {
-							console.log('subj');
 							newTemp = temp.slice(0, -2) + '{{subst:Dpn|page=' + XFDH.pageName.slice(15) + '|2=' + result + '|date=' + xfdDate + '|n=' + count + '}}\n}}';
 							newContent = oldcontent.replace(temp, newTemp);
 						}
@@ -701,8 +668,6 @@ $(function() {
 			} else {
 				newContent = newTemp = '{{subst:Dpn|page=' + XFDH.pageName.slice(15) + '|2=' + result + '|date=' + xfdDate + '}}\n\n';
 			}
-			console.log(newTemp);
-			console.log(newContent);
 			const apiResult = await editPage(talkpage, newContent, '+{{削除依頼ログ}}');
 			return apiResult;
 		}
