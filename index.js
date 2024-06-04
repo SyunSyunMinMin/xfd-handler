@@ -1,8 +1,9 @@
 // <nowiki>
 $(function() {
-	if (!mw.config.get('wgPageName').startsWith('Wikipedia:削除依頼/')) {
+	if (!mw.config.get('wgPageName').startsWith('Wikipedia:削除依頼/') || mw.config.get('wgPageName').startsWith('Wikipedia:削除依頼/ログ')) {
 		return;
 	}
+	console.log('load');
 	mw.loader.using(['mediawiki.util', 'mediawiki.Title', '@wikimedia/codex'], function(require) {
 		const Vue = require('vue');
 		const Codex = require('@wikimedia/codex');
