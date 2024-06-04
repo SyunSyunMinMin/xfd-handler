@@ -1,0 +1,25 @@
+{
+  "name": "xfd-handler",
+  "version": "1.0.0",
+  "description": "削除依頼の処理補助スクリプト",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SyunSyunMinMin/xfd-handler.git"
+  },
+  "author": "SyunSyunMinMin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SyunSyunMinMin/xfd-handler/issues"
+  },
+  "homepage": "https://github.com/SyunSyunMinMin/xfd-handler#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.3.0",
+    "@stylistic/eslint-plugin-js": "^2.1.0",
+    "eslint": "^9.3.0",
+    "globals": "^15.3.0"
+  }
+}
