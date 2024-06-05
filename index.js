@@ -652,7 +652,7 @@ $(function() {
 				const curtemplate = oldcontent.match(/(\{\{削除依頼ログ(?:<nowiki>.*<\/nowiki>|[^}}])*\}\})/gs);
 				if (curtemplate !== null) {
 					curtemplate.forEach(function(temp) {
-						const regexp = /talk=true/;
+						const regexp = /talk\s*=\s*true/;
 						const isfortalk = regexp.test(temp);
 						const counter = temp.match(/\|(?:full)?page(?<num>\d+)/g);
 						var count = 1;
@@ -670,11 +670,11 @@ $(function() {
 						}
 					});
 				} else {
-					newTemp = '{{subst:Dpn|page=' + XFDH.pageName.slice(15) + '|2=' + result + '|date=' + xfdDate + '}}\n';
+					newTemp = '{{subst:Dpn|page=' + XFDH.pageName.slice(15) + '|2=' + result + '|date=' + xfdDate + (isTalk ? '|ノート=1' : '') + '}}\n';
 					newContent = newTemp + oldcontent;
 				}
 			} else {
-				newContent = newTemp = '{{subst:Dpn|page=' + XFDH.pageName.slice(15) + '|2=' + result + '|date=' + xfdDate + '}}\n\n';
+				newContent = newTemp = '{{subst:Dpn|page=' + XFDH.pageName.slice(15) + '|2=' + result + '|date=' + xfdDate + (isTalk ? '|ノート=1' : '') + '}}\n\n';
 			}
 			const apiResult = await editPage(talkpage, newContent, '+{{削除依頼ログ}}');
 			return apiResult;
