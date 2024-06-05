@@ -8,7 +8,7 @@ $(function() {
 		const Codex = require('@wikimedia/codex');
 
 		var XFDH = {
-			summaryAd: ' ([[User:Syunsyunminmin/xfd-handler.js|xfd-handler]])',
+			summaryAd: ' ([[User:Syunsyunminmin/script/XfD-handler.js|xfd-handler]])',
 			api: new mw.Api(),
 			pageName: mw.config.get('wgPageName'),
 			hasDelPerm: mw.config.get('wgUserGroups').includes('sysop') || mw.config.get('wgUserGroups').includes('eliminator')
