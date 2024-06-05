@@ -427,19 +427,14 @@ $(function() {
 		}
 
 		async function createPreviewContent(content, title = XFDH.pageName) {
-			const response = await XFDH.api.get({
-				action: 'parse',
-				contentmodel: 'wikitext',
+			const newContent = await XFDH.api.parse(content, {
 				disablelimitreport: 1,
 				format: 'json',
-				formatversion: '2',
 				preview: 1,
-				prop: 'text',
 				pst: 1,
 				text: content,
 				title: title
 			});
-			var newContent = response.parse.text;
 			return newContent;
 		}
 
