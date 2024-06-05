@@ -420,7 +420,9 @@ $(function() {
 				const action = mw.util.getParamValue('action', url);
 				if (action === 'history') {
 					const title = mw.util.getParamValue('title', url);
-					titles.push(title);
+					if (!titles.includes(title)) {
+						titles.push(title);
+					}
 				}
 			});
 			return titles;
@@ -543,22 +545,24 @@ $(function() {
 					await addDelNote(title, getResult(obj));
 				}
 			}
-			const newContent = await generateNewContent(getResult(obj), generateAdminComment(obj.templateValue, obj.commentValue), {needCheck: obj.needCheckValue});
-			var summary = '';
-			if (obj.templateValue === '対処') {
-				summary = '対処';
-				if (obj.needCheckValue) {
-					summary += '、確認待ち';
+			if (obj.closeModeValues) {
+				const newContent = await generateNewContent(getResult(obj), generateAdminComment(obj.templateValue, obj.commentValue), {needCheck: obj.needCheckValue});
+				var summary = '';
+				if (obj.templateValue === '対処') {
+					summary = '対処';
+					if (obj.needCheckValue) {
+						summary += '、確認待ち';
+					} else {
+						summary += '、終了';
+					}
+				} else if (obj.templateValue === '確認') {
+					summary = '確認、終了';
 				} else {
-					summary += '終了';
+					summary = '終了';
 				}
-			} else if (obj.templateValue === '確認') {
-				summary = '確認';
-			} else {
-				summary = '終了';
+				const apiResult = await editPage(XFDH.pageName, newContent, summary);
+				return apiResult;
 			}
-			const apiResult = await editPage(XFDH.pageName, newContent, summary);
-			return apiResult;
 		}
 
 		async function rmtagFromPage(title) {
@@ -571,6 +575,15 @@ $(function() {
 				rvslots: '*',
 				titles: title
 			});
+			const missing = Object.prototype.hasOwnProperty.call(response.query.pages[0], 'missing');
+			if (missing) {
+				mw.notify($(`<span><a href="${mw.util.getUrl(title)}" target="_blank">${title}</a> が存在しません。<br />このページの削除依頼タグの除去をスキップします。</span>`), {
+					autoHide: false,
+					title: '[警告] ' + title,
+					type: 'warn'
+				});
+				return;
+			}
 			const oldcontent = response.query.pages[0].revisions[0].slots.main.content;
 			const topCmt = '<!-- 削除についての議論が終了するまで、下記のメッセージ部分は除去しないでください。もしあなたがこのテンプレートを除去した場合、差し戻されます。またページが保護されることもあります。 -->',
 				lstCmt = '<!-- 削除についての議論が終了するまで、上記部分は削除しないでください。 -->',
