@@ -478,16 +478,19 @@ $(function() {
 			return result;
 		}
 
-		async function editPage(title, content, summary, {nocreate = 0} = {}) {
-			const result = await XFDH.api.postWithToken('csrf', {
+		async function editPage(title, content, summary, {nocreate = false} = {}) {
+			var params = {
 				action: 'edit',
 				format: 'json',
 				title: title,
 				text: content,
 				summary: summary + XFDH.summaryAd,
-				nocreate: nocreate,
 				formatversion: '2'
-			});
+			};
+			if (nocreate) {
+				params.nocreate = 1;
+			}
+			const result = await XFDH.api.postWithToken('csrf', params);
 			if ('error' in result) {
 				mw.notify($(`<span><a href="${mw.util.getUrl(title)}" target="_blank">${title}</a> の編集中にエラーが発生しました。<br />エラー内容: ${result.error.info}</span>`), {
 					autoHide: false,
@@ -589,12 +592,15 @@ $(function() {
 				lstCmt = '<!-- 削除についての議論が終了するまで、上記部分は削除しないでください。 -->',
 				hasTopCmt = oldcontent.includes(topCmt),
 				hasLstCmt = oldcontent.includes(lstCmt),
+				copyTagRegExp = /\{\{\s*([Cc]opyrights?|[Cc]opyvio|著作権(侵害(指摘)?)?)\s*(\|[^}]*\s*)?\}\}/,
+				hasCopyTag = copyTagRegExp.test(oldcontent),
 				tagRegExp = /\{\{\s*[sS]akujo\/本体\s*\|\s*\d{4}年\d{1,2}月\d{1,2}日\s*\|\s*(<nowiki>.*(?!<\/nowiki>).*<\/nowiki>|[^}])*\}\}\n?/,
 				hasTag = tagRegExp.test(oldcontent);
 			var newContent = oldcontent
 				.replace(topCmt, '')
 				.replace(lstCmt, '')
 				.replace(tagRegExp, '')
+				.replace(copyTagRegExp, '')
 				.trim();
 			if (!hasTag) {
 				mw.notify($(`<span><a href="${mw.util.getUrl(title)}" target="_blank">${title}</a> で削除依頼タグが検出できませんでした。</span><br /><span>既に除去されたか、そもそも削除審議の対象ではないかもしれません。</span>`), {
@@ -613,7 +619,11 @@ $(function() {
 					type: 'warn'
 				});
 			}
-			const apiResult = await editPage(title, newContent, '-sakujo');
+			var summary = '-sakujo';
+			if (hasCopyTag) {
+				summary += ', -copyrights';
+			}
+			const apiResult = await editPage(title, newContent, summary);
 			return apiResult;
 		}
 
@@ -676,6 +686,8 @@ $(function() {
 			} else {
 				newContent = newTemp = '{{subst:Dpn|page=' + XFDH.pageName.slice(15) + '|2=' + result + '|date=' + xfdDate + (isTalk ? '|ノート=1' : '') + '}}\n\n';
 			}
+			// eslint-disable-next-line no-console
+			console.log(newTemp);
 			const apiResult = await editPage(talkpage, newContent, '+{{削除依頼ログ}}');
 			return apiResult;
 		}
