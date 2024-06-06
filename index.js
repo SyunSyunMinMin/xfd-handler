@@ -478,14 +478,15 @@ $(function() {
 			return result;
 		}
 
-		async function editPage(title, content, summary, {nocreate = false} = {}) {
+		async function editPage(title, content, summary, {nocreate = false, watchlist = 'watch'} = {}) {
 			var params = {
 				action: 'edit',
 				format: 'json',
-				title: title,
-				text: content,
+				formatversion: '2',
 				summary: summary + XFDH.summaryAd,
-				formatversion: '2'
+				text: content,
+				title: title,
+				watchlist: watchlist
 			};
 			if (nocreate) {
 				params.nocreate = 1;
