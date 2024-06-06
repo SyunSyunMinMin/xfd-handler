@@ -478,14 +478,14 @@ $(function() {
 			return result;
 		}
 
-		async function editPage(title, content, summary) {
+		async function editPage(title, content, summary, {nocreate = 0} = {}) {
 			const result = await XFDH.api.postWithToken('csrf', {
 				action: 'edit',
 				format: 'json',
 				title: title,
 				text: content,
 				summary: summary + XFDH.summaryAd,
-				nocreate: 1,
+				nocreate: nocreate,
 				formatversion: '2'
 			});
 			if ('error' in result) {
