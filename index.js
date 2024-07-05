@@ -162,10 +162,10 @@ $(function() {
 					},
 					onPrimaryAction() {
 						this.showDialog = false;
-						execute_vote('\n* {{AFD|' + this.voteValue + '}} ' + this.commentValue, this.voteValue);
+						execute_vote('\n* {{AFD|' + this.voteValue + '}} ' + this.commentValue + '--~~~~', this.voteValue);
 					},
 					changed() {
-						this.previewValue = '* {{AFD|' + this.voteValue + '}} ' + this.commentValue;
+						this.previewValue = '* {{AFD|' + this.voteValue + '}} ' + this.commentValue + '--~~~~';
 					}
 				},
 				mounted() {
