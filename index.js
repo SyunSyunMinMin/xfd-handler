@@ -629,6 +629,7 @@ $(function() {
 		}
 
 		async function addDelNote(title, result) {
+			const shortSubPageName = XFDH.pageName.slice(15);
 			const titleobj = new mw.Title(title);
 			const talkpage = titleobj.getTalkPage().getPrefixedText();
 			const isTalk = titleobj.isTalkPage();
@@ -662,10 +663,21 @@ $(function() {
 				const oldcontent = response.query.pages[0].revisions[0].slots.main.content;
 				const curtemplate = oldcontent.match(/(\{\{削除依頼ログ(?:<nowiki>.*<\/nowiki>|[^}}])*\}\})/gs);
 				if (curtemplate !== null) {
-					curtemplate.forEach(function(temp) {
+					for (const temp of curtemplate) {
 						const regexp = /talk\s*=\s*true/;
 						const isfortalk = regexp.test(temp);
 						const counter = temp.match(/\|(?:full)?page(?<num>\d+)/g);
+						const isalready = new RegExp('\\|\\s*page\\d+\\s*=\\s*' + shortSubPageName + '\\s*\\|').test(temp);
+						if (isalready) {
+							var noteAlreadyText = $(`<span>既に削除依頼ログが <a href="${mw.util.getUrl(talkpage)}" target="_blank">${talkpage}</a> へ追加されているようです。</span><br /><span>ログの追加をスキップします。</span>`),
+								noteAlreadyTitle = '[警告] ' + title;
+							mw.notify(noteAlreadyText, {
+								autoHide: false,
+								title: noteAlreadyTitle,
+								type: 'warn'
+							});
+							return;
+						}
 						var count = 1;
 						counter.forEach(function(t) {
 							var num = t.match(/\d+/);
@@ -676,16 +688,16 @@ $(function() {
 						});
 
 						if (!isfortalk && !isTalk || isfortalk && isTalk) {
-							newTemp = temp.slice(0, -2) + '{{subst:Dpn|page=' + XFDH.pageName.slice(15) + '|2=' + result + '|date=' + xfdDate + '|n=' + count + '}}\n}}';
+							newTemp = temp.slice(0, -2) + '{{subst:Dpn|page=' + shortSubPageName + '|2=' + result + '|date=' + xfdDate + '|n=' + count + '}}\n}}';
 							newContent = oldcontent.replace(temp, newTemp);
 						}
-					});
+					}
 				} else {
-					newTemp = '{{subst:Dpn|page=' + XFDH.pageName.slice(15) + '|2=' + result + '|date=' + xfdDate + (isTalk ? '|ノート=1' : '') + '}}\n';
+					newTemp = '{{subst:Dpn|page=' + shortSubPageName + '|2=' + result + '|date=' + xfdDate + (isTalk ? '|ノート=1' : '') + '}}\n';
 					newContent = newTemp + oldcontent;
 				}
 			} else {
-				newContent = newTemp = '{{subst:Dpn|page=' + XFDH.pageName.slice(15) + '|2=' + result + '|date=' + xfdDate + (isTalk ? '|ノート=1' : '') + '}}\n\n';
+				newContent = newTemp = '{{subst:Dpn|page=' + shortSubPageName + '|2=' + result + '|date=' + xfdDate + (isTalk ? '|ノート=1' : '') + '}}\n\n';
 			}
 			// eslint-disable-next-line no-console
 			console.log(newTemp);
