@@ -679,14 +679,13 @@ $(function() {
 							return;
 						}
 						var count = 1;
-						counter.forEach(function(t) {
+						for (const t of counter) {
 							var num = t.match(/\d+/);
 							num = Number(num[0]);
 							if (count <= num) {
 								count = num + 1;
 							}
-						});
-
+						}
 						if (!isfortalk && !isTalk || isfortalk && isTalk) {
 							newTemp = temp.slice(0, -2) + '{{subst:Dpn|page=' + shortSubPageName + '|2=' + result + '|date=' + xfdDate + '|n=' + count + '}}\n}}';
 							newContent = oldcontent.replace(temp, newTemp);
